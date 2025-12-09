@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login | Fantasy Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+
+<div class="heart-bg"></div>
+
+<div class="login-container">
+    <h2 class="login-title">💞 Welcome My Love 💞</h2>
+    <p class="login-sub">Login to Our Fantasy Board</p>
+
+    <input id="email" type="email" class="login-input" placeholder="Your Email">
+    <input id="password" type="password" class="login-input" placeholder="Your Password">
+
+    <button class="login-btn" onclick="login()">Login</button>
+
+    <p id="error" class="error-text"></p>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script src="firebase.js"></script>
+
+<script>
+async function login() {
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        window.location.href = "dashboard.html";
+    } catch (err) {
+        document.getElementById("error").innerText = err.message;
+    }
+}
+</script>
+
+</body>
+</html>

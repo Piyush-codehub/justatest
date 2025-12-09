@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Our Fantasy Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="heart-bg"></div>
+
+<div class="board-container">
+    <h1 class="title">💖 Our Fantasy Board 💖</h1>
+
+    <input id="itemInput" class="fantasy-input" placeholder="Write your fantasy here...">
+    <button class="submit-btn" onclick="addItem()">Add Fantasy</button>
+
+    <div id="itemList" class="fantasy-list"></div>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script src="firebase.js"></script>
+
+<script>
+let userUID;
+
+// Protect dashboard
+auth.onAuthStateChanged(user => {
+    if (!user) return window.location.href = "index.html";
+    userUID = user.uid;
+    loadItems();
+});
+
+// Add fantasy
+function addItem() {
+    const text = document.getElementById("itemInput").value.trim();
+    if (!text) return alert("Write something beautiful!");
+
+    db.collection("users").doc(userUID).collection("fantasies").add({
+        text: text,
+        created: Date.now()
+    });
+
+    document.getElementById("itemInput").value = "";
+}
+
+// Load fantasies realtime
+function loadItems() {
+    db.collection("users")
+      .doc(userUID)
+      .collection("fantasies")
+      .orderBy("created", "desc")
+      .onSnapshot(snapshot => {
+          let html = "";
+          snapshot.forEach(doc => {
+              const item = doc.data();
+              html += `
+                <div class="fantasy-card">
+                    <p>${item.text}</p>
+
+                    <div class="btn-row">
+                        <button class="edit-btn" onclick="editItem('${doc.id}', '${item.text}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteItem('${doc.id}')">Delete</button>
+                    </div>
+                </div>
+              `;
+          });
+          document.getElementById("itemList").innerHTML = html;
+      });
+}
+
+// Edit fantasy
+function editItem(id, old) {
+    const updated = prompt("Edit your fantasy:", old);
+    if (updated && updated.trim() !== "") {
+        db.collection("users")
+          .doc(userUID)
+          .collection("fantasies")
+          .doc(id)
+          .update({ text: updated });
+    }
+}
+
+// Delete fantasy
+function deleteItem(id) {
+    db.collection("users")
+      .doc(userUID)
+      .collection("fantasies")
+      .doc(id)
+      .delete();
+}
+
+// Logout
+function logout() {
+    auth.signOut();
+}
+</script>
+
+</body>
+</html>
